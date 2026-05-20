@@ -6,6 +6,7 @@
 <title>Árvore da Empatia</title>
 
 <style>
+    /* RESET E CONFIGURAÇÕES GERAIS */
     * {
         margin: 0;
         padding: 0;
@@ -14,8 +15,9 @@
 
     body {
         overflow: hidden;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #87CEEB; /* Mudei para um azul céu para destacar a árvore */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(180deg, #87CEEB 0%, #b3e5fc 100%);
+        touch-action: manipulation;
     }
 
     #game {
@@ -30,170 +32,93 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Lembre-se de usar uma imagem PNG transparente real aqui */
+        object-fit: cover;
         z-index: 1;
     }
 
-    /* FRUTAS - Convertidas para Emojis */
+    /* OVERLAY PARA DAR FOCO AO DIÁLOGO */
+    #overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 80;
+        display: none;
+        backdrop-filter: blur(2px);
+        transition: opacity 0.3s ease;
+    }
+
+    /* FRUTAS / EMOJIS */
     .fruit {
         position: absolute;
-        font-size: 60px; /* Tamanho da fruta/emoji */
+        font-size: clamp(45px, 7vw, 60px);
         cursor: pointer;
-        transition: 0.25s;
+        transition: transform 0.25s, filter 0.25s;
         z-index: 20;
         user-select: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .fruit:hover {
         transform: scale(1.2);
-        filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+        filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9));
     }
 
-    /* PERSONAGEM */
-    #luciana {
-        position: absolute;
-        width: 90px;
-        height: 160px;
-        bottom: 30px;
-        left: 120px;
-        z-index: 50;
-        transition: 0.4s linear;
-    }
-
-    /* cabeça */
-    .head {
-        width: 60px;
-        height: 60px;
-        background: #ffd5b5;
-        border-radius: 50%;
-        margin: auto;
-        position: relative;
-        border: 3px solid #222;
-    }
-
-    /* cabelo */
-    .hair {
-        width: 65px;
-        height: 35px;
-        background: #4b2e1f;
-        border-radius: 40px 40px 15px 15px;
-        position: absolute;
-        top: -5px;
-        left: -3px;
-    }
-
-    .eye {
-        width: 7px;
-        height: 7px;
-        background: #222;
-        border-radius: 50%;
-        position: absolute;
-        top: 28px;
-    }
-
-    .eye1 { left: 18px; }
-    .eye2 { right: 18px; }
-
-    .smile {
-        width: 18px;
-        height: 10px;
-        border-bottom: 3px solid #222;
-        border-radius: 0 0 20px 20px;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        top: 38px;
-    }
-
-    /* corpo */
-    .body {
-        width: 55px;
-        height: 70px;
-        background: #ff5f93;
-        margin: auto;
-        border-radius: 15px;
-        border: 3px solid #222;
-    }
-
-    .arms { position: relative; }
-
-    .arm {
-        width: 12px;
-        height: 45px;
-        background: #ffd5b5;
-        position: absolute;
-        top: -65px;
-        border-radius: 20px;
-    }
-
-    .arm.left {
-        left: 8px;
-        transform: rotate(20deg);
-    }
-
-    .arm.right {
-        right: 8px;
-        transform: rotate(-20deg);
-    }
-
-    .legs {
-        display: flex;
-        justify-content: space-around;
-        width: 40px;
-        margin: auto;
-    }
-
-    .leg {
-        width: 12px;
-        height: 40px;
-        background: #333;
-        border-radius: 20px;
-    }
-
-    /* BALÃO */
+    /* BALÃO DE DIÁLOGO */
     #dialog {
         position: absolute;
         left: 50%;
-        top: 40px;
-        transform: translateX(-50%);
-        width: 500px;
-        min-height: 130px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 500px;
         background: white;
         border-radius: 25px;
-        padding: 22px;
+        padding: 25px;
         border: 5px solid #5a331f;
         z-index: 100;
         display: none;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        text-align: center;
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+        0% { transform: translate(-50%, -40%) scale(0.8); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
 
     #speaker {
         color: #ff4f84;
-        font-size: 28px;
+        font-size: clamp(22px, 4vw, 28px);
         font-weight: bold;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
     }
 
     #message {
-        font-size: 22px;
+        font-size: clamp(18px, 3.5vw, 22px);
         color: #333;
-        line-height: 1.4;
+        line-height: 1.5;
     }
 
-    /* instruções */
+    /* INSTRUÇÕES */
     #instructions {
         position: absolute;
         top: 20px;
         left: 20px;
-        background: white;
+        width: auto;
+        max-width: 380px;
+        background: rgba(255, 255, 255, 0.95);
         padding: 15px 20px;
         border-radius: 18px;
-        z-index: 100;
-        font-size: 18px;
+        z-index: 10;
+        font-size: clamp(14px, 3vw, 18px);
         border: 3px solid #333;
-        box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+        text-align: left;
+        pointer-events: none;
     }
-    /* NOVO DESIGN DA LUCIANA - ESTILO VETOR */
+
+    /* PERSONAGEM LUCIANA */
     #luciana {
         position: absolute;
         width: 140px; 
@@ -201,103 +126,54 @@
         bottom: 20px;
         left: 120px;
         z-index: 50;
-        transition: left 0.4s ease-out;
+        transition: left 0.5s ease-out;
         filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+        transform-origin: bottom center;
     }
 
-    /* Cabelo */
-    .hair-back {
-        width: 110px; height: 120px;
-        background: #5d3a28;
-        border-radius: 60px 60px 20px 20px;
-        position: absolute; top: -5px; left: 15px;
-    }
-
-    /* Rosto */
-    .head {
-        width: 90px; height: 100px;
-        background: #ffe0c5;
-        border-radius: 45px 45px 35px 35px;
-        margin: auto; position: relative;
-        top: 10px;
-        overflow: hidden;
-    }
-
-    .hair-front {
-        width: 100px; height: 50px;
-        background: #5d3a28;
-        border-radius: 0 0 50px 50px;
-        position: absolute; top: -10px; left: -5px;
-    }
-
-    .eye {
-        width: 10px; height: 12px;
-        background: #333;
-        border-radius: 50%;
-        position: absolute; top: 45px;
-    }
+    /* VETOR LUCIANA (Corpo) */
+    .hair-back { width: 110px; height: 120px; background: #5d3a28; border-radius: 60px 60px 20px 20px; position: absolute; top: -5px; left: 15px; }
+    .head { width: 90px; height: 100px; background: #ffe0c5; border-radius: 45px 45px 35px 35px; margin: auto; position: relative; top: 10px; overflow: hidden; }
+    .hair-front { width: 100px; height: 50px; background: #5d3a28; border-radius: 0 0 50px 50px; position: absolute; top: -10px; left: -5px; }
+    .eye { width: 10px; height: 12px; background: #333; border-radius: 50%; position: absolute; top: 45px; }
     .eye.left { left: 25px; }
     .eye.right { right: 25px; }
-
-    .eye::after {
-        content: '';
-        width: 4px; height: 4px;
-        background: white;
-        border-radius: 50%;
-        position: absolute; top: 2px; left: 2px;
-    }
-
-    .smile {
-        width: 25px; height: 12px;
-        border-bottom: 4px solid #333;
-        border-radius: 0 0 30px 30px;
-        position: absolute; left: 50%; top: 65px;
-        transform: translateX(-50%);
-    }
-
-    /* Corpo e Vestido */
-    .neck {
-        width: 15px; height: 15px;
-        background: #ffe0c5;
-        position: absolute; top: 100px; left: 62px;
-    }
-
-    .body {
-        width: 70px; height: 100px;
-        background: #ff7faa;
-        background-image: radial-gradient(#fff 10%, transparent 10%);
-        background-size: 15px 15px;
-        margin: auto; position: absolute;
-        top: 110px; left: 35px;
-        border-radius: 20px 20px 10px 10px;
-    }
-
-    .arm {
-        width: 15px; height: 70px;
-        background: #ffe0c5;
-        position: absolute; top: 115px;
-        border-radius: 30px;
-        transform-origin: top center;
-    }
+    .eye::after { content: ''; width: 4px; height: 4px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+    .smile { width: 25px; height: 12px; border-bottom: 4px solid #333; border-radius: 0 0 30px 30px; position: absolute; left: 50%; top: 65px; transform: translateX(-50%); }
+    .neck { width: 15px; height: 15px; background: #ffe0c5; position: absolute; top: 100px; left: 62px; }
+    .body { width: 70px; height: 100px; background: #ff7faa; background-image: radial-gradient(#fff 10%, transparent 10%); background-size: 15px 15px; margin: auto; position: absolute; top: 110px; left: 35px; border-radius: 20px 20px 10px 10px; }
+    .arm { width: 15px; height: 70px; background: #ffe0c5; position: absolute; top: 115px; border-radius: 30px; transform-origin: top center; }
     .arm.left { left: 15px; transform: rotate(10deg); }
     .arm.right { right: 15px; transform: rotate(-10deg); }
+    .legs { display: flex; justify-content: space-around; width: 60px; margin: auto; position: absolute; top: 205px; left: 40px; }
+    .leg { width: 18px; height: 35px; background: #ffe0c5; border-radius: 0 0 10px 10px; position: relative; }
+    .shoe { width: 22px; height: 12px; background: #d32f2f; border-radius: 10px 10px 5px 5px; position: absolute; bottom: -5px; left: -2px; }
 
-    .legs {
-        display: flex; justify-content: space-around;
-        width: 60px; margin: auto;
-        position: absolute; top: 205px; left: 40px;
-    }
-    .leg {
-        width: 18px; height: 35px;
-        background: #ffe0c5;
-        border-radius: 0 0 10px 10px;
-        position: relative;
-    }
-    .shoe {
-        width: 22px; height: 12px;
-        background: #d32f2f;
-        border-radius: 10px 10px 5px 5px;
-        position: absolute; bottom: -5px; left: -2px;
+    /* --- AJUSTES RESPONSIVOS (MOBILE) --- */
+    @media (max-width: 768px) {
+        #instructions {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        #luciana {
+            transform: scale(0.7);
+            bottom: 5px;
+            left: 50% !important; /* Inicia no centro no mobile */
+            margin-left: -70px;
+        }
+
+        /* AJUSTE EXCLUSIVO PARA CELULAR (Sobrescreve o Desktop) */
+        #fruits-layer .fruit:nth-of-type(1) { top: 30% !important; left: 48% !important; transform: translateX(-50%) !important; } /* Morango */
+        #fruits-layer .fruit:nth-of-type(2) { top: 18% !important; left: 20% !important; } /* Maçã */
+        #fruits-layer .fruit:nth-of-type(3) { top: 35% !important; left: 15% !important; } /* Laranja */
+        #fruits-layer .fruit:nth-of-type(4) { top: 30% !important; left: 75% !important; } /* Banana */
+        #fruits-layer .fruit:nth-of-type(5) { top: 18% !important; left: 60% !important; } /* Uva */
+        #fruits-layer .fruit:nth-of-type(6) { top: 48% !important; left: 30% !important; } /* Melancia */
+        #fruits-layer .fruit:nth-of-type(7) { top: 45% !important; left: 60% !important; } /* Cereja */
     }
 </style>
 
@@ -307,11 +183,13 @@
 
 <div id="game">
 
-    <img id="background" src="images/arvore.png" alt="Árvore">
+    <img id="background" src="images/arvore.png" alt="" onerror="this.style.display='none'">
+
+    <div id="overlay"></div>
 
     <div id="instructions">
-        🌳 Clique nas frutas da Árvore da Empatia.<br>
-        💖 Luciana aprenderá sobre sentimentos e amor <3.
+        🌳 <strong>Árvore da Empatia</strong><br>
+        Toque nas frutas para aprender sobre sentimentos com a Luciana! 💖
     </div>
 
     <div id="dialog">
@@ -337,51 +215,72 @@
         </div>
     </div>
 
-  <div class="fruit" style="top:5%; left:50%;" data-name="Morango" data-message="Às vezes, alguém pode parecer feliz por fora, mas estar triste por dentro.">🍓</div>
-    <div class="fruit" style="top:10%; left:40%;" data-name="Maçã" data-message="Empatia é tentar entender os sentimentos das outras pessoas.">🍎</div>
-    <div class="fruit" style="top:30%; left: 35%;" data-name="Laranja" data-message="Pequenos gestos de carinho podem melhorar o dia de alguém.">🍊</div>
-    <div class="fruit" style="top:25%; left:50%;" data-name="Banana" data-message="Escutar alguém com atenção também é uma forma de amor.">🍌</div>
-    <div class="fruit" style="top:35%; left:45%;" data-name="Uva" data-message="Cada pessoa sente as coisas de um jeito diferente.">🍇</div>
-    <div class="fruit" style="top:35%; left:70%;" data-name="Melancia" data-message="A gentileza pode transformar o mundo aos poucos.">🍉</div>
-    <div class="fruit" style="top:25%; left:60%;" data-name="Cereja" data-message="Quando ajudamos alguém, mostramos que ela não está sozinha.">🍒</div>
+    <div id="fruits-layer">
+        <div class="fruit" style="top:15%; left:50%; transform: translateX(-50%);" data-name="Morango" data-message="Às vezes, alguém pode parecer feliz por fora, mas estar triste por dentro.">🍓</div>
+        <div class="fruit" style="top:20%; left:35%;" data-name="Maçã" data-message="Empatia é tentar entender os sentimentos das outras pessoas.">🍎</div>
+        <div class="fruit" style="top:35%; left: 40%;" data-name="Laranja" data-message="Pequenos gestos de carinho podem melhorar o dia de alguém.">🍊</div>
+        <div class="fruit" style="top:35%; left:55%;" data-name="Banana" data-message="Escutar alguém com atenção também é uma forma de amor.">🍌</div>
+        <div class="fruit" style="top:20%; left:60%;" data-name="Uva" data-message="Cada pessoa sente as coisas de um jeito diferente.">🍇</div>
+        <div class="fruit" style="top:40%; left:30%;" data-name="Melancia" data-message="A gentileza pode transformar o mundo aos poucos.">🍉</div>
+        <div class="fruit" style="top:40%; left:65%;" data-name="Cereja" data-message="Quando ajudamos alguém, mostramos que ela não está sozinha.">🍒</div>
+    </div>
+
 </div>
 
 <script>
     const fruits = document.querySelectorAll(".fruit");
     const dialog = document.getElementById("dialog");
+    const overlay = document.getElementById("overlay");
     const speaker = document.getElementById("speaker");
     const message = document.getElementById("message");
     const luciana = document.getElementById("luciana");
 
+    function moveLuciana(fruitElement) {
+        const rect = fruitElement.getBoundingClientRect();
+        let newLeft = rect.left + (rect.width / 2) - (luciana.offsetWidth / 2);
+        const maxLeft = window.innerWidth - luciana.offsetWidth;
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        luciana.style.left = newLeft + "px";
+    }
+
     fruits.forEach(fruit => {
         fruit.addEventListener("mouseenter", () => {
-            const rect = fruit.getBoundingClientRect();
-            // Move a personagem para perto da fruta
-            luciana.style.left = (rect.left - 20) + "px";
+            if (window.innerWidth > 768) {
+                moveLuciana(fruit);
+            }
         });
 
-        fruit.addEventListener("click", () => {
+        fruit.addEventListener("click", (e) => {
+            e.stopPropagation();
+            moveLuciana(fruit);
+
             const name = fruit.dataset.name;
             const msg = fruit.dataset.message;
 
             speaker.innerHTML = "💖 " + name;
             message.innerHTML = msg;
+            
             dialog.style.display = "block";
+            overlay.style.display = "block";
 
             fruit.style.transform = "scale(1.3)";
             fruit.style.filter = "drop-shadow(0 0 15px gold)";
 
             setTimeout(() => {
-                fruit.style.transform = "scale(1)";
+                fruit.style.transform = "";
                 fruit.style.filter = "none";
             }, 600);
         });
     });
 
-    /* fechar diálogo clicando fora */
-    document.body.addEventListener("click", (e) => {
-        if(!e.target.classList.contains("fruit")){
-            dialog.style.display = "none";
+    function closeDialog() {
+        dialog.style.display = "none";
+        overlay.style.display = "none";
+    }
+
+    document.getElementById("game").addEventListener("click", (e) => {
+        if(!e.target.classList.contains("fruit") && !dialog.contains(e.target)){
+            closeDialog();
         }
     });
 </script>
